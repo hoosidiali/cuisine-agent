@@ -1,0 +1,11 @@
+[build]
+  # Directory with your static files (index.html)
+  publish = "public"
+  # Directory where your serverless functions are
+  functions = "netlify/functions"
+
+# This rule makes your function available at a clean URL
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

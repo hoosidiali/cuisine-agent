@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>CuisineAgent - AI Recipe Fusion</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown to HTML conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Recipe Card Styling: Use a classic, elegant look */
+        #recipe-output-container { /* Recipe Card Styling: Clean and Professional */
+            background-color: #ffffff; /* White background */
+            border: 1px solid #e0e6ed; /* Light gray border */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+
+        /* Custom scrollbar for better visual appeal */
+        textarea::-webkit-scrollbar, #recipe-output::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb, #recipe-output::-webkit-scrollbar-thumb {
+            background-color: #94a3b8; /* slate-400 */
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-track, #recipe-output::-webkit-scrollbar-track {
+            background-color: #e2e8f0; /* slate-200 */
+        }
+
+        /* Styling for the AI-generated Markdown content */
+        #recipe-output {
+            font-family: 'Inter', sans-serif; /* Modern sans-serif */
+            color: #374151; /* Dark gray text */
+            line-height: 1.6; /* Improved line height for readability */
+        }
+
+        #recipe-output h1 {
+            font-family: 'Playfair Display', serif; /* Elegant Serif for Title */
+            font-size: 2.25rem; /* text-4xl, more compact */
+            font-weight: 800; /* Bolder for more impact */
+            color: #262626; /* Darker, more sophisticated */
+            margin-bottom: 1rem; /* More breathing room */
+            line-height: 1.2; /* Slightly adjusted line height */
+            letter-spacing: -0.025em; /* Tighten letter spacing */
+        }
+
+        /* Style for the introductory paragraph */
+        #recipe-output h1 + p {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #4b5563; /* gray-600 */
+            margin-bottom: 1.5rem;
+        }
+
+        #recipe-output h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem; /* text-2xl, more compact */
+            font-weight: 600; /* Semi-bold */
+            margin-top: 2rem; /* More separation between sections */
+            margin-bottom: 0.5rem; /* Tighter spacing */
+            padding-bottom: 0.25rem; /* Adjusted padding */
+            border-bottom: 2px solid #e5e7eb; /* Lighter border */
+            color: #334155; /* slate-700, better contrast */
+        }
+        
+        #recipe-output p {
+            margin-bottom: 1.25rem; /* Adjusted spacing */
+            font-size: 0.95rem; /* Slightly smaller for compactness */
+            color: #4a5568; /* Slate-600 */
+        }
+
+        #recipe-output ul, #recipe-output ol {
+            margin-left: 0; /* Remove default margin */
+            padding-left: 1.75rem; /* Adjusted padding */
+            list-style-position: outside;
+        }
+        #recipe-output ul li {
+            list-style-type: none; /* Custom bullet style */
+            position: relative;
+            margin-bottom: 0.5rem; /* Tighter spacing */
+            padding-left: 1.1rem; /* Adjusted padding */
+            font-size: 1rem; /* Base font size */
+        }
+        #recipe-output ul li::before {
+            content: "\2022"; /* Unicode bullet */
+            color: #3b82f6; /* Blue-500 */
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        #recipe-output ol li {
+            font-size: 1rem;
+            font-weight: 400; /* Regular weight for readability */
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            padding-left: 0.5rem; /* Add padding to align with custom marker */
+        }
+        #recipe-output ol li::marker {
+            font-weight: 700; /* Bold numbers */
+            font-size: 1.1rem;
+            color: #3b82f6; /* Blue-500, brand color */
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff !important;
+            }
+            header, footer, .lg\:col-span-1, /* Input panel */
+            #combine-button, #copy-recipe-button, #print-recipe-button,
+            .initial-message-div, /* The "Input two recipes..." message */
+            #modal-container {
+                display: none !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            #recipe-output-container {
+                width: 100% !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Page Header -->
+    <header class="bg-white shadow-sm py-4 px-4 sm:px-8 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-extrabold text-gray-800 tracking-tight flex items-center group">
+                <i class="fas fa-robot text-blue-500 mr-2 group-hover:text-blue-600 transition-colors duration-200"></i> CuisineAgent
+            </a>
+            <nav>
+                <a href="#" class="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200">Home</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 sm:p-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-extrabold text-gray-800 tracking-tight">
+                    <i class="fas fa-robot text-blue-500 mr-2"></i> CuisineAgent
+                </h1>
+                <p class="text-xl text-gray-500 mt-2">Your AI-powered culinary assistant for innovative recipe fusion.</p>
+            </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4" id="main-content-grid">
+            <!-- Input Panel (1/3 width on desktop) -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xl h-full border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-utensils text-blue-500 mr-2"></i> Define Ingredients
+                </h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label for="recipe1" class="block text-sm font-semibold text-gray-700 mb-2">Recipe 1 (Base/Main Dish):</label>
+                        <textarea id="recipe1" rows="4" placeholder="E.g., Ingredients and steps for a Shepherd's Pie..."
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out resize-none shadow-inner"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="recipe2" class="block text-sm font-semibold text-gray-700 mb-2">Recipe 2 (Flavor/Twist):</label>
+                        <textarea id="recipe2" rows="4" placeholder="E.g., Ingredients and steps for a Tandoori Marinade..."
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out resize-none shadow-inner"></textarea>
+                    </div>
+
+                    <button id="combine-button" onclick="combineRecipes()"
+                        class="w-full px-6 py-3 bg-blue-600 text-white font-extrabold text-lg rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="button-text"><i class="fas fa-rocket mr-2"></i> Fuse & Generate Recipe</span>
+                        <div id="loading-spinner" class="hidden spinner-border animate-spin inline-block w-6 h-6 border-4 rounded-full border-t-transparent border-white"></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Panel (Recipe Card) (2/3 width on desktop) -->
+            <div class="lg:col-span-2 p-4 rounded-2xl h-full lg:sticky lg:top-4" id="recipe-output-container">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="recipe-card-title" class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-scroll text-blue-500 mr-2"></i> Detailed Recipe Card
+                    </h2>
+                    <div class="flex space-x-2" id="recipe-actions">
+                        <button id="copy-recipe-button" onclick="copyRecipe()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed hidden" disabled>
+                            <i class="fas fa-copy mr-2"></i> <span id="copy-button-text">Copy Recipe</span>
+                        </button>
+                        <button id="print-recipe-button" onclick="printRecipe()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed hidden" disabled> 
+                            <i class="fas fa-print mr-2"></i> <span id="print-button-text">Print Recipe</span>
+                        </button>
+                        <button id="save-recipe-button" onclick="saveRecipe()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed hidden" disabled>
+                            <i class="fas fa-heart mr-2"></i> <span id="save-button-text">Save Recipe</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="recipe-output" class="p-4 sm:p-8 text-gray-700 overflow-y-auto min-h-[500px]">
+                    <div class="text-center p-12">
+                        <i class="fas fa-concierge-bell text-gray-300 text-6xl initial-message-div"></i>
+                        <p class="text-gray-500 mt-4 text-lg">Input two recipes on the left to create a new one.</p>
+                        <p class="text-gray-400 text-sm mt-1">Try combining a French dish and a Thai curry!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Recipes Section -->
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-heart text-blue-500 mr-2"></i> Saved Recipes
+            </h2>
+            <div id="saved-recipes-list" class="space-y-4">
+            </div>
+        </div>
+
+        <!-- Hidden Modal for Message Box -->
+        <div id="modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-out" onclick="hideMessage()">
+            <div id="modal-content" class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full scale-95 transition-all duration-300 ease-out" onclick="event.stopPropagation()">
+                <h3 id="modal-title" class="text-2xl font-bold mb-4 text-red-600"></h3>
+                <p id="modal-body" class="text-gray-700 mb-4"></p>
+                <button onclick="hideMessage()" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">Close</button>
+            </div>
+        </div>
+
+        </div>
+    </main>
+
+    <!-- Page Footer -->
+    <footer class="bg-gray-800 text-white py-6 px-4 sm:px-8 mt-auto">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            &copy; <span id="current-year"></span> CuisineAgent. All rights reserved.</div>
+    </footer>
+
+    <script>
+        // Global Variables
+        // NOTE: When running locally, you must provide your own API key in this script.
+        // The API key has been moved to a secure backend proxy.
+        // The frontend now calls our own server, which then calls the Gemini API.
+        const PROXY_API_URL = "/api/generate";
+
+        const recipeOutput = document.getElementById('recipe-output');
+        const combineButton = document.getElementById('combine-button');
+        const buttonText = document.getElementById('button-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const modalContainer = document.getElementById('modal-container');
+        const modalTitle = document.getElementById('modal-title'); // Correctly a const
+        const modalBody = document.getElementById('modal-body'); // Correctly a const
+        const modalContent = document.getElementById('modal-content'); // Correctly a const
+        const copyRecipeButton = document.getElementById('copy-recipe-button');
+        const copyButtonText = document.getElementById('copy-button-text');
+        const printRecipeButton = document.getElementById('print-recipe-button');
+        const printButtonText = document.getElementById('print-button-text');
+
+        // Function to show custom message box (instead of alert)
+        const saveRecipeButton = document.getElementById('save-recipe-button');
+        const saveButtonText = document.getElementById('save-button-text');
+        function showMessage(title, message, isError = true) {
+            modalTitle.textContent = title;
+            modalBody.textContent = message;
+
+            const button = modalContent.querySelector('button');
+            if (isError) {
+                modalTitle.className = 'text-xl font-bold mb-3 text-red-600';
+                button.className = 'w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition';
+            } else {
+                modalTitle.className = 'text-xl font-bold mb-3 text-green-600';
+                button.className = 'w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition'; // Use brand color for success
+            }
+            
+            modalContainer.classList.remove('opacity-0', 'pointer-events-none');
+            modalContainer.classList.add('opacity-100', 'pointer-events-auto');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        function hideMessage() {
+            modalContainer.classList.remove('opacity-100', 'pointer-events-auto');
+            modalContainer.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+
+        // Function to copy the generated recipe to clipboard
+        async function copyRecipe() {
+            const recipeText = recipeOutput.textContent; // Get plain text content
+            if (!recipeText.trim()) {
+                showMessage("Nothing to Copy", "There is no recipe generated yet to copy.", false); // Not an error, just info
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(recipeText);
+                copyButtonText.textContent = 'Copied!';
+                copyRecipeButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                copyRecipeButton.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                setTimeout(() => {
+                    copyButtonText.textContent = 'Copy Recipe';
+                    copyRecipeButton.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                    copyRecipeButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy recipe: ', err);
+                showMessage("Copy Failed", "Could not copy the recipe to clipboard. Please try again or copy manually.", true);
+            }
+        }
+
+        // Function to print the generated recipe
+        function printRecipe() {
+            if (!recipeOutput.textContent.trim()) {
+                showMessage("Nothing to Print", "There is no recipe generated yet to print.", false);
+                return;
+            }
+
+            // Trigger browser print dialog
+            window.print();
+        }
+
+        // Function to save the generated recipe to local storage
+        function saveRecipe() {
+            const recipeTitle = document.querySelector('#recipe-output h1')?.textContent;
+            const recipeContent = recipeOutput.innerHTML;
+
+            if (!recipeTitle || !recipeContent) {
+                showMessage("Cannot Save", "No recipe has been generated yet.", true);
+                return;
+            }
+
+            const recipeKey = 'recipe-' + Date.now(); // Unique key
+            const recipeData = {
+                title: recipeTitle,
+                content: recipeContent
+            };
+
+            localStorage.setItem(recipeKey, JSON.stringify(recipeData));
+
+            saveButtonText.textContent = 'Saved!';
+            saveRecipeButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            saveRecipeButton.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+            setTimeout(() => {
+                saveButtonText.textContent = 'Save Recipe';
+                saveRecipeButton.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                saveRecipeButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            }, 2000);
+
+            displaySavedRecipes(); // Update the displayed list
+        }
+
+        // Function to load a saved recipe from local storage
+        function loadRecipe(key) {
+            const recipeData = JSON.parse(localStorage.getItem(key));
+            if (recipeData) {
+                recipeOutput.innerHTML = recipeData.content;
+                copyRecipeButton.disabled = false;
+                copyRecipeButton.classList.remove('hidden');
+                printRecipeButton.disabled = false;
+                printRecipeButton.classList.remove('hidden');
+                saveRecipeButton.disabled = false;
+                saveRecipeButton.classList.remove('hidden');
+                recipeOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                showMessage("Error Loading", "Could not load the saved recipe.", true);
+            }
+        }
+
+        // Function to remove a saved recipe from local storage
+        function removeRecipe(key) {
+            localStorage.removeItem(key);
+            displaySavedRecipes(); // Update the displayed list
+        }
+
+        // Function to display saved recipes in the list
+        function displaySavedRecipes() {
+            const savedRecipesList = document.getElementById('saved-recipes-list');
+            savedRecipesList.innerHTML = ''; // Clear existing list
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('recipe-')) {
+                    const recipeData = JSON.parse(localStorage.getItem(key));
+                    if (recipeData) {
+                        const recipeElement = document.createElement('div');
+                        recipeElement.className = 'flex items-center justify-between p-4 rounded-lg bg-gray-100 border border-gray-200';
+
+                        recipeElement.innerHTML = `
+                            <span class="font-semibold text-gray-700">${recipeData.title}</span>
+                            <div class="space-x-2">
+                                <button onclick="loadRecipe('${key}')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm">Load</button>
+                                <button onclick="removeRecipe('${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 text-sm">Remove</button>
+                            </div>
+                        `;
+                        savedRecipesList.appendChild(recipeElement);
+                    }
+                }
+            }
+        }
+
+        // Call displaySavedRecipes() on page load
+        window.onload = displaySavedRecipes;
+        /**
+         * Parses the generated Markdown, extracts a custom metadata block,
+         * and converts the rest of the Markdown to HTML using the 'marked' library.
+         */
+        function markdownToHtml(markdown) {
+            let remainingMarkdown = markdown;
+
+            let metadataHtml = '';
+            // Regex to find the "Recipe Overview" paragraph and extract it.
+            const metadataRegex = /^(Prep Time:.*?Cook Time:.*?Servings:.*?)$/im;
+            const metadataMatch = markdown.match(metadataRegex);
+
+            if (metadataMatch) {
+                const metadataBlock = metadataMatch[0];
+                // Extract details for structured HTML
+                const prepTimeMatch = metadataBlock.match(/Prep Time:? *([\s\S]*?)(Cook Time:|Servings:|$)/i);
+                const cookTimeMatch = metadataBlock.match(/Cook Time:? *([\s\S]*?)(Servings:|$)/i);
+                const servingsMatch = metadataBlock.match(/Servings:? *([\s\S]*?)$/i);
+
+                const metadataItems = [
+                    { label: 'Prep', icon: 'hourglass-start', value: prepTimeMatch ? prepTimeMatch[1].trim().replace(/,$/, '') : 'N/A' },
+                    { label: 'Cook', icon: 'hourglass-half', value: cookTimeMatch ? cookTimeMatch[1].trim().replace(/,$/, '') : 'N/A' },
+                    { label: 'Servings', icon: 'users', value: servingsMatch ? servingsMatch[1].trim() : 'N/A' },
+                ];
+
+                metadataHtml = `
+                    <div class="flex flex-wrap justify-around p-4 my-6 rounded-lg bg-blue-50 border border-blue-200 text-center">
+                        ${metadataItems.map(item => `
+                            <div class="flex flex-col items-center justify-center p-2 w-1/3">
+                                <i class="fas fa-${item.icon} text-blue-500 text-lg mb-1"></i>
+                                <span class="text-xs font-semibold text-blue-700 uppercase tracking-wider">${item.label}</span>
+                                <span class="text-sm font-bold text-blue-900">${item.value.replace(/\*\*/g, '')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                // Remove the metadata paragraph from the markdown to avoid it being rendered twice.
+                remainingMarkdown = markdown.replace(metadataRegex, '');
+            }
+
+            // Use the 'marked' library to convert the rest of the markdown to HTML.
+            let contentHtml = marked.parse(remainingMarkdown);
+
+            // Inject the custom metadata HTML after the first H1 tag.
+            contentHtml = contentHtml.replace(/(<h1.*?>.*?<\/h1>)/, `$1${metadataHtml}`);
+
+            return contentHtml;
+        }
+
+        // Core function to call the Gemini API
+        async function callGemini(userPrompt, systemPrompt) {
+            const maxRetries = 3;
+            let lastError = null;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    // Call our backend proxy instead of the Gemini API directly
+                    const response = await fetch(PROXY_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userPrompt, systemPrompt })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Request failed: ${response.status} - ${JSON.stringify(errorData)}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (text) {
+                        return text;
+                    } else {
+                        throw new Error("API response was missing generated text content.");
+                    }
+
+                } catch (error) {
+                    lastError = error;
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000; // Exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+
+            throw new Error(`Failed to call Gemini API after ${maxRetries} attempts. Last error: ${lastError.message}`);
+        }
+
+        async function combineRecipes() {
+            const recipe1 = document.getElementById('recipe1').value.trim();
+            const recipe2 = document.getElementById('recipe2').value.trim();
+
+            if (!recipe1 || !recipe2) {
+                showMessage("Input Required", "Please paste content for both Recipe 1 and Recipe 2 to combine them.", true);
+                return;
+            }
+
+            // UI State: Loading
+            combineButton.disabled = true;
+            buttonText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            recipeOutput.innerHTML = '<div class="text-center p-12"><i class="fas fa-spinner fa-spin text-5xl text-blue-600"></i><p class="mt-4 text-xl text-gray-600 font-semibold">Creating the ultimate fusion dish...</p><p class="text-sm text-gray-500 mt-2">This may take a moment as the AI chef crafts your unique recipe.</p></div>';
+
+            const systemPrompt = `
+                You are a world-class culinary scientist and creative chef. Your task is to combine the two provided recipes into a single, cohesive, innovative, and delicious new recipe. Generate the output **strictly** in Markdown format following this structure:
+                1. A single H1 title (preceded by #). 
+                2. A concise, descriptive introductory paragraph (2-3 sentences).
+                3. A 'Recipe Overview' section **formatted as a single paragraph** listing **Prep Time**, **Cook Time**, and **Servings**. Example: Prep Time: 20 minutes, Cook Time: 45 minutes, Servings: 4-6 people.
+                4. A H2 heading 'Ingredients' (preceded by ##) followed by a detailed, organized bulleted list.
+                5. A H2 heading 'Instructions' (preceded by ##) followed by clear, step-by-step numbered instructions.
+                Ensure the tone is professional, creative, and uses precise culinary terminology.
+            `;
+
+            const userQuery = `
+                Please combine the following two recipes into a single, integrated recipe:
+
+                --- RECIPE 1 (Base/Main) ---
+                ${recipe1}
+
+                --- RECIPE 2 (Flavor/Twist) ---
+                ${recipe2}
+            `;
+
+            try {
+                const generatedMarkdown = await callGemini(userQuery, systemPrompt);
+                
+                // Convert the generated Markdown text to HTML for display
+                const generatedHtml = markdownToHtml(generatedMarkdown);
+                
+                recipeOutput.innerHTML = `<div class="p-2">${generatedHtml}</div>`;
+                copyRecipeButton.disabled = false;
+                copyRecipeButton.classList.remove('hidden');
+                printRecipeButton.disabled = false;
+                printRecipeButton.classList.remove('hidden');
+                
+                // Scroll to the new recipe
+                recipeOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                console.error("Fusion failed:", error);
+                // Re-display initial message or error message
+                recipeOutput.innerHTML = `
+                    <div class="text-center p-12 bg-red-50 rounded-lg border-2 border-red-300">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
+                        <p class="text-gray-500 mt-4 text-lg">Input two recipes on the left to create a new one.</p>
+                        <p class="mt-4 text-red-700 font-semibold">Fusion Error: The AI chef encountered a problem.</p>
+                        <p class="mt-2 text-red-600 text-sm">Please try again or simplify the input recipes. Error details: ${error.message}</p>
+                    </div>
+                `;
+                copyRecipeButton.disabled = true; // Keep copy button disabled on error
+                printRecipeButton.disabled = true; // Keep print button disabled on error
+                copyRecipeButton.classList.add('hidden'); // Hide buttons on error
+                printRecipeButton.classList.add('hidden'); // Hide buttons on error
+            } finally {
+                // UI State: Finished
+                combineButton.disabled = false;
+                buttonText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+
+
+
+</body>
+</html>
