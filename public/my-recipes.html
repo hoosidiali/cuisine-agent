@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Saved Recipes - CuisineAgent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Page Header -->
+    <header class="bg-white shadow-sm py-4 px-4 sm:px-8 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-extrabold text-gray-800 tracking-tight flex items-center group">
+                <i class="fas fa-robot text-blue-500 mr-2 group-hover:text-blue-600 transition-colors duration-200"></i> CuisineAgent
+            </a>
+            <nav class="flex items-center space-x-4">
+                <a href="/" class="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200">Generator</a>
+                <a href="/recipes.html" class="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200">Our Recipes</a>
+                <a href="/my-recipes.html" class="text-blue-600 font-bold transition-colors duration-200">My Recipes</a>
+                <button id="theme-toggle" class="text-gray-500 hover:text-blue-600 transition-colors duration-200 w-10 h-10 rounded-full flex items-center justify-center">
+                    <i id="theme-toggle-icon" class="fas fa-moon text-lg"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 sm:p-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-heart text-blue-500 mr-3"></i> My Saved Recipes
+                </h1>
+                <!-- Filter Section -->
+                <div id="filter-container" class="mb-6 pb-4 border-b border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-2">Filter by Tag:</h3>
+                    <div id="filter-tags" class="flex flex-wrap gap-2">
+                        <!-- Filter tags will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="saved-recipes-list" class="space-y-4">
+                    <!-- Saved recipes will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Page Footer -->
+    <footer class="bg-gray-800 text-white py-6 px-4 sm:px-8 mt-auto">
+        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
+            &copy; <span id="current-year">2024</span> CuisineAgent. All rights reserved.</div>
+    </footer>
+
+    <!-- Confirmation Modal is needed for the remove button -->
+    <div id="confirm-modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-out">
+        <div id="confirm-modal-content" class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full scale-95 transition-all duration-300 ease-out" onclick="event.stopPropagation()">
+            <h3 id="confirm-modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h3>
+            <p id="confirm-modal-body" class="text-gray-700 mb-6"></p>
+            <div class="flex justify-end space-x-4">
+                <button id="confirm-cancel-button" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                <button id="confirm-ok-button" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="my-recipes.js" defer></script>
+</body>
+</html>

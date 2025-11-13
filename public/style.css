@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+    --color-bg: #f0f4f8;
+    --color-surface: #ffffff;
+    --color-surface-subtle: #f8fafc;
+    --color-border: #e0e6ed;
+    --color-border-subtle: #e2e8f0;
+    --color-text-primary: #1f2937;
+    --color-text-secondary: #4a5568;
+    --color-text-heading: #262626;
+    --color-text-subheading: #334155;
+    --color-text-italic: #4b5563;
+    --color-accent: #3b82f6;
+    --color-accent-hover: #2563eb; /* Not currently used, but good to have */
+    --color-accent-text: #ffffff;
+    --color-metadata-bg: #eff6ff;
+    --color-metadata-border: #dbeafe;
+    --color-metadata-icon: #60a5fa; /* A slightly lighter blue for the icon */
+    --color-metadata-label: #3b82f6; /* The main accent blue for the label text */
+    --color-metadata-value: #1e40af;
+    --color-scrollbar-thumb: #94a3b8;
+    --color-scrollbar-track: #e2e8f0;
+}
+
+.dark {
+    --color-bg: #111827;
+    --color-surface: #1f2937;
+    --color-surface-subtle: #1f2937;
+    --color-border: #374151;
+    --color-border-subtle: #374151;
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d1d5db; /* Increased contrast for better readability */
+    --color-text-heading: #f9fafb;
+    --color-text-subheading: #d1d5db;
+    --color-text-italic: #9ca3af;
+    --color-accent: #60a5fa;
+    --color-accent-hover: #3b82f6;
+    --color-accent-text: #111827;
+    --color-metadata-bg: rgba(59, 130, 246, 0.1);
+    --color-metadata-border: rgba(59, 130, 246, 0.2);
+    --color-metadata-icon: #93c5fd; /* A lighter blue for the icon */
+    --color-metadata-label: #60a5fa; /* A mid-range blue for the label text */
+    --color-metadata-value: #dbeafe;
+    --color-scrollbar-thumb: #4b5563;
+    --color-scrollbar-track: #1f2937;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* Recipe Card Styling: Use a classic, elegant look */
+#recipe-output-container { /* Recipe Card Styling: Clean and Professional */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom scrollbar for better visual appeal */
+textarea::-webkit-scrollbar, #recipe-output::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+textarea::-webkit-scrollbar-thumb, #recipe-output::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: 4px;
+}
+textarea::-webkit-scrollbar-track, #recipe-output::-webkit-scrollbar-track {
+    background-color: var(--color-scrollbar-track);
+}
+
+/* Styling for the AI-generated Markdown content */
+#recipe-output {
+    font-family: 'Inter', sans-serif; /* Modern sans-serif */
+    color: var(--color-text-secondary);
+    line-height: 1.6; /* Improved line height for readability */
+}
+
+#recipe-output h1 {
+    font-family: 'Playfair Display', serif; /* Elegant Serif for Title */
+    font-size: 2.25rem; /* text-4xl, more compact */
+    font-weight: 800; /* Bolder for more impact */
+    color: var(--color-text-heading);
+    margin-bottom: 1rem; /* More breathing room */
+    line-height: 1.2; /* Slightly adjusted line height */
+    letter-spacing: -0.025em; /* Tighten letter spacing */
+}
+
+/* Style for the introductory paragraph */
+#recipe-output h1 + p {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--color-text-italic);
+    margin-bottom: 1.5rem;
+}
+
+#recipe-output h2 {
+    font-family: 'Inter', sans-serif; /* Use Inter for section headers for a modern feel */
+    font-size: 1.5rem; /* text-2xl, more compact */
+    font-weight: 600; /* Semi-bold */
+    margin-top: 2rem; /* More separation between sections */
+    margin-bottom: 0.5rem; /* Tighter spacing */
+    padding-bottom: 0.25rem; /* Adjusted padding */
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-text-subheading);
+}
+
+#recipe-output p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+}
+
+#recipe-output ul, #recipe-output ol {
+    margin-left: 0; /* Remove default margin */
+    padding-left: 0; /* Remove padding, we'll handle it in the li */
+    list-style-position: outside;
+}
+
+/* Ingredients List Styling */
+#recipe-output ul {
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+#recipe-output ul li {
+    list-style-type: none;
+    position: relative;
+    padding-left: 2rem; /* Space for the icon */
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+    font-size: 1rem;
+}
+#recipe-output ul li::before {
+    font-family: "Font Awesome 5 Free";
+    content: "\f10c"; /* fa-circle (regular) */
+    font-weight: 400;
+    color: var(--color-accent);
+    position: absolute;
+    left: 0.5rem;
+    top: 0.25rem;
+}
+#recipe-output ul li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Instructions List Styling */
+#recipe-output ol li {
+    font-size: 1rem;
+    font-weight: 400; /* Regular weight for readability */
+    margin-bottom: 1.5rem; /* More space between steps */
+    line-height: 1.6;
+    padding-left: 1rem;
+    border-left: 3px solid var(--color-border-subtle);
+    position: relative;
+}
+#recipe-output ol li::marker {
+    font-weight: 800; /* Bolder numbers */
+    font-size: 1.5rem;
+    color: var(--color-accent);
+}
+
+/* Animation styles for Saved Recipes list */
+.saved-recipe-item {
+    transition: all 0.4s ease-in-out;
+    overflow: hidden;
+    max-height: 100px; /* A high enough value for the element's content */
+}
+.saved-recipe-item.entering {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+}
+.saved-recipe-item.removing {
+    opacity: 0;
+    transform: scale(0.95);
+    max-height: 0 !important;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-width: 0;
+}
+
+/* Print-specific styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    /* Make only the recipe container and its direct content visible */
+    #recipe-output-container, #recipe-card-title, #recipe-card-title *, #recipe-output, #recipe-output * {
+        visibility: visible;
+    }
+
+    /* Position the recipe container to fill the page */
+    #recipe-output-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+
+/* Additional styles for dark mode UI elements */
+.dark #main-content-grid .bg-white,
+.dark .bg-white {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.dark .text-gray-800 { color: var(--color-text-heading); }
+.dark .text-gray-700 { color: var(--color-text-secondary); }
+.dark .text-gray-600 { color: var(--color-text-secondary); }
+.dark .text-gray-500 { color: var(--color-text-secondary); }
+.dark .border-gray-200 { border-color: var(--color-border); }
+.dark .bg-gray-100 { background-color: #374151; } /* For saved recipe items */
+.dark .bg-gray-200 { background-color: #4b5563; } /* For action buttons */
+.dark .hover\:bg-gray-300:hover { background-color: #6b7280; }
+
+/* Dark mode styles for header and form elements */
+.dark header.bg-white {
+    border-bottom-color: var(--color-border);
+}
+.dark textarea {
+    background-color: #374151; /* slate-700 */
+    border-color: #4b5563; /* slate-600 */
+    color: var(--color-text-primary);
+}
+.dark textarea::placeholder {
+    color: #9ca3af; /* slate-400 */
+}
